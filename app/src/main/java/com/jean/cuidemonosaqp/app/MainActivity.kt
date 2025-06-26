@@ -20,26 +20,51 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import android.app.Application
 import androidx.work.Configuration
+import com.jean.cuidemonosaqp.modules.auth.data.sync.SyncManager
+import com.jean.cuidemonosaqp.shared.utils.ConnectionLiveData
 import dagger.hilt.android.HiltAndroidApp
+import android.widget.Toast
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var syncManager: SyncManager
 
-    fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 1. Programamos sincronización automática cada 15 minutos
+        syncManager.syncPeriodically()
+
+        // 2. Detectamos si hay conexión a internet con ConnectionLiveData
+        val connectionLiveData = ConnectionLiveData(this)
+
+        connectionLiveData.observe(this) { isConnected ->
+            if (isConnected) {
+                // 3. Si hay conexión, sincronizamos ahora y mostramos un Toast
+                syncManager.syncNow()
+                Toast.makeText(
+                    this,
+                    "✔ Datos sincronizados correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // 4. (Opcional) Si se pierde conexión, puedes mostrar otro mensaje
+                Toast.makeText(
+                    this,
+                    "⚠ No hay conexión. Intentando luego...",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
         enableEdgeToEdge()
         setContent {
             CuidemonosAQPTheme(dynamicColor = false) {
                 MainScreen()
             }
         }
+
+
     }
 }
 

@@ -13,6 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import android.widget.Toast
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+
+
 
 class SyncManager @Inject constructor(
     private val repository: AuthRepositoryImpl,
@@ -31,9 +36,15 @@ class SyncManager @Inject constructor(
 
     fun syncNow() {
         CoroutineScope(Dispatchers.IO).launch {
-        repository.syncPendingRegistrations()
+            repository.syncPendingRegistrations()
+
+            // Volvemos al hilo principal para mostrar el Toast
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Datos sincronizados correctamente", Toast.LENGTH_SHORT).show()
+            }
         }
     }
+
 
     fun syncPeriodically() {
         val request = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES).build()

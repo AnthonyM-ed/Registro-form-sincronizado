@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.jean.cuidemonosaqp.navigation.NavGraph
@@ -16,9 +17,21 @@ import com.jean.cuidemonosaqp.navigation.Routes
 import com.jean.cuidemonosaqp.shared.components.BottomNavigationBar
 import com.jean.cuidemonosaqp.shared.theme.CuidemonosAQPTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import android.app.Application
+import androidx.work.Configuration
+import dagger.hilt.android.HiltAndroidApp
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    fun getWorkManagerConfiguration(): Configuration {
+        return Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
